@@ -57,11 +57,13 @@ class bfTimezone {
 					$strDateTo = date("F d, Y", $intTZEnd); /* diferent month, day, year */
 				}else{
 					/* same day */
-					if(!empty($strOffset) || ( $bShowTime && date("Hi", $intStart) != "0000") ) {
-						$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
-					}
-					if(!empty($strOffset) || ( $bShowTime && date("Hi", $intTZEnd) != "0000") ) {					
-						$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
+					if($bShowTime) {
+						if(!empty($strOffset) && date("Hi", $intStart) != "0000") {
+							$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
+						}
+						if(!empty($strOffset) && date("Hi", $intTZEnd) != "0000") {					
+							$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
+						}
 					}
 				}
 			}
