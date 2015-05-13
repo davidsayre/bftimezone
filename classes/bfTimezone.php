@@ -34,7 +34,7 @@ class bfTimezone {
 	}
 
 	public static function dateRangeTimezone($intStart, $intEnd, $strOffset, $strTimezoneCode, $bShowTime){
-		if($strOffset !== false && $strOffset != ""){
+		if($strOffset !== false && $strOffset != ""){			
 			$intTZStart = bftimezone::translateDate($intStart, $strOffset);
 			$intTZEnd = bftimezone::translateDate($intEnd, $strOffset);
 		}else{
@@ -43,7 +43,7 @@ class bfTimezone {
 		}
 		$strDateFrom = "";
 		$strDateTo = "";
-		
+
 		$strDateFrom .= date("F d, Y", $intTZStart);		
 		if(date("Y",$intTZStart) != date("Y",$intTZEnd)){
 			$strDateTo .= $strDateTo." ".date("F d, Y", $intTZEnd); /* different year */
@@ -58,10 +58,17 @@ class bfTimezone {
 				}else{
 					/* same day */
 					if($bShowTime) {
-						if(!empty($strOffset) && date("Hi", $intStart) != "0000") {
+						if(empty($strOffset)) {
+							//offset is not found, check for midnight trick					
+							if( date("Hi", $intStart) != "0000" ) {
+								$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
+							}
+							if( date("Hi", $intTZEnd) != "0000" ) {	
+								$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
+							}
+						} else {
+							//offset found allow time append requested
 							$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
-						}
-						if(!empty($strOffset) && date("Hi", $intTZEnd) != "0000") {					
 							$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
 						}
 					}
