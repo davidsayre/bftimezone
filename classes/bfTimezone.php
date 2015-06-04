@@ -44,33 +44,44 @@ class bfTimezone {
 		$strDateFrom = "";
 		$strDateTo = "";
 
-		$strDateFrom .= date("F d, Y", $intTZStart);		
+		$strDateFrom .= date("F d", $intTZStart);		
 		if(date("Y",$intTZStart) != date("Y",$intTZEnd)){
+			$strDateFrom .= date(", Y", $intTZStart);
 			$strDateTo .= $strDateTo." ".date("F d, Y", $intTZEnd); /* different year */
 		}else{
 			/* same year */
 			if(date("FY",$intTZStart) != date("FY",$intTZEnd)){
 				$strDateTo = date("F d", $intTZEnd); /* different month year */
+				$strDateFrom .= date(", Y", $intTZStart);
 			}else{
 				/* same month, year */
 				if(date("FdY",$intTZStart) != date("FdY",$intTZEnd)){
 					$strDateTo = date("F d, Y", $intTZEnd); /* diferent month, day, year */
 				}else{
+					$strDateFrom .= date(", Y", $intTZStart);
 					/* same day */
 					if($bShowTime) {
+						$sTimeFrom = '';
+						$sTimeTo = '';
 						if(empty($strOffset)) {
 							//offset is not found, check for midnight trick					
 							if( date("Hi", $intStart) != "0000" ) {
-								$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
+								$sTimeFrom = date("g:i A", $intTZStart); /* append not 00:00 time */
 							}
 							if( date("Hi", $intTZEnd) != "0000" ) {	
-								$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
+								$sTimeTo = date("g:i A", $intTZEnd); /* append not 00:00 time */
 							}
 						} else {
 							//offset found allow time append requested
-							$strDateFrom .= date(" g:i A", $intTZStart); /* append not 00:00 time */
-							$strDateTo = $strDateTo." ".date("g:i A", $intTZEnd); /* append not 00:00 time */
+							$sTimeFrom = date("g:i A", $intTZStart); /* append not 00:00 time */
+							$sTimeTo = date("g:i A", $intTZEnd); /* append not 00:00 time */
 						}
+						//check for same end time
+						if( date("Hi", $intTZEnd) == date("Hi", $intStart) ) {
+							$sTimeTo = '';
+						}
+						if(!empty($sTimeFrom)) { $strDateFrom .= " " .trim($sTimeFrom); } //append
+						if(!empty($sTimeTo)) { $strDateTo .= " " .trim($sTimeTo); } //append
 					}
 				}
 			}
@@ -78,7 +89,7 @@ class bfTimezone {
 
 		$sTimezoneAbbr = self::abbeviateTimezone($strTimezoneCode);
 
-		return $strDateFrom.($strDateTo!=""?" - ".$strDateTo:"").($bShowTime&&$strTimezoneCode!=""?" <span class='tz_code' title='".$strTimezoneCode."'>".$sTimezoneAbbr."</span>":"");
+		return $strDateFrom.($strDateTo!=""?" - ".trim($strDateTo):"").($bShowTime&&$strTimezoneCode!=""?" <span class='tz_code' title='".$strTimezoneCode."'>".$sTimezoneAbbr."</span>":"");
 	}
 
 	private function _callGoogleTimezoneApi($aryParams){
