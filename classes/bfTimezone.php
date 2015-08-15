@@ -1,6 +1,8 @@
 <?php
 
 class bfTimezone {
+
+	/* Requires bfcore extension and bfDateRange class */
 	
 	static $strURL = "https://maps.googleapis.com/maps/api/timezone/json?";
 
@@ -14,13 +16,13 @@ class bfTimezone {
 		//let's add the human readable number
 		$objTimeZone->humanOffset = "UTC ".(strpos($objTimeZone->rawOffset, "-")===false?"+":"").(($objTimeZone->rawOffset/60/60)+($objTimeZone->dstOffset/60/60));
 		$objTimeZone->humanOffsetNoUTC = (strpos($objTimeZone->rawOffset, "-")===false?"+":"").(($objTimeZone->rawOffset/60/60)+($objTimeZone->dstOffset/60/60));
-		return ($objTimeZone);		
+		return ($objTimeZone);
 	}
 
 	static function translateDate($intTimestamp, $strZoneCorrection){
 		$intUTCDate = strtotime(DateTime::createFromFormat("U", $intTimestamp)->format("Y-m-d H:i:s"));
-		$intTransfomredDate = $intUTCDate + ($strZoneCorrection*60*60);
-		return $intTransfomredDate;
+		$intTransformedDate = $intUTCDate + ($strZoneCorrection*60*60);
+		return $intTransformedDate;
 	}
 
 	static function abbeviateTimezone($strTimezoneCode) {
@@ -41,55 +43,16 @@ class bfTimezone {
 			$intTZStart = $intStart;
 			$intTZEnd = $intEnd;
 		}
-		$strDateFrom = "";
-		$strDateTo = "";
 
-		$strDateFrom .= date("F d", $intTZStart);		
-		if(date("Y",$intTZStart) != date("Y",$intTZEnd)){
-			$strDateFrom .= date(", Y", $intTZStart);
-			$strDateTo .= $strDateTo." ".date("F d, Y", $intTZEnd); /* different year */
-		}else{
-			/* same year */
-			if(date("FY",$intTZStart) != date("FY",$intTZEnd)){
-				$strDateTo = date("F d", $intTZEnd); /* different month year */
-				$strDateFrom .= date(", Y", $intTZStart);
-			}else{
-				/* same month, year */
-				if(date("FdY",$intTZStart) != date("FdY",$intTZEnd)){
-					$strDateTo = date("F d, Y", $intTZEnd); /* diferent month, day, year */
-				}else{
-					$strDateFrom .= date(", Y", $intTZStart);
-					/* same day */
-					if($bShowTime) {
-						$sTimeFrom = '';
-						$sTimeTo = '';
-						if(empty($strOffset)) {
-							//offset is not found, check for midnight trick					
-							if( date("Hi", $intStart) != "0000" ) {
-								$sTimeFrom = date("g:i A", $intTZStart); /* append not 00:00 time */
-							}
-							if( date("Hi", $intTZEnd) != "0000" ) {	
-								$sTimeTo = date("g:i A", $intTZEnd); /* append not 00:00 time */
-							}
-						} else {
-							//offset found allow time append requested
-							$sTimeFrom = date("g:i A", $intTZStart); /* append not 00:00 time */
-							$sTimeTo = date("g:i A", $intTZEnd); /* append not 00:00 time */
-						}
-						//check for same end time
-						if( date("Hi", $intTZEnd) == date("Hi", $intStart) ) {
-							$sTimeTo = '';
-						}
-						if(!empty($sTimeFrom)) { $strDateFrom .= " " .trim($sTimeFrom); } //append
-						if(!empty($sTimeTo)) { $strDateTo .= " " .trim($sTimeTo); } //append
-					}
-				}
-			}
+		$bfDateRange = new bfDateRange(true);
+		$sDateRange = $bfDateRange->getDateTimeRange($intTZStart,$intTZEnd,true,false,false,' ');
+
+		//append TZ abbr
+		if( ( stripos($sDateRange, 'am') !== false || stripos($sDateRange, 'pm') !== false) && $strTimezoneCode != "") {
+			$sDateRange .= " <span class='tz_code' title='".$strTimezoneCode."'>".self::abbeviateTimezone($strTimezoneCode)."</span>";
 		}
 
-		$sTimezoneAbbr = self::abbeviateTimezone($strTimezoneCode);
-
-		return $strDateFrom.($strDateTo!=""?" - ".trim($strDateTo):"").($bShowTime&&$strTimezoneCode!=""?" <span class='tz_code' title='".$strTimezoneCode."'>".$sTimezoneAbbr."</span>":"");
+		return $sDateRange;
 	}
 
 	private function _callGoogleTimezoneApi($aryParams){

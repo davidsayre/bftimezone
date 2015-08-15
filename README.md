@@ -3,6 +3,11 @@ bftimezone extension
 
 Provides enhanced timezone functionality for eZ Publish.
 
+Requirements
+------------
+
+bfcore eZ extension. Specifically the bfDateRange() class
+
 
 Installation
 ------------
