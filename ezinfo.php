@@ -6,7 +6,7 @@
 // COPYRIGHT NOTICE: Copyright (C) 2007-2014 Beaconfire Consulting
 // SOFTWARE LICENSE: The MIT License (MIT) (http://opensource.org/licenses/MIT)
 
-class workflowboardInfo
+class bftimezoneInfo
 {
     static function info()
     {
